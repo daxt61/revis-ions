@@ -6,9 +6,12 @@ export async function createClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
+  const supabaseUrl = url || 'https://placeholder.supabase.co'
+  const supabaseKey = key || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder'
+
   return createServerClient(
-    url || 'https://aioxyelmkmeklecdqziv.supabase.co',
-    key || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder',
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {

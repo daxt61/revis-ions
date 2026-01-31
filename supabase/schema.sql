@@ -1,3 +1,4 @@
+-- Disable RLS for all tables as requested
 -- Create a table for public profiles
 create table profiles (
   id uuid references auth.users on delete cascade not null primary key,
@@ -71,3 +72,10 @@ $$ language plpgsql security definer;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
+
+-- Disable RLS on all tables
+alter table profiles disable row level security;
+alter table posts disable row level security;
+alter table comments disable row level security;
+alter table votes disable row level security;
+alter table chat_messages disable row level security;

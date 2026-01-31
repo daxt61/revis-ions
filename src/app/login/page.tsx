@@ -19,7 +19,8 @@ export default function LoginPage() {
     setError(null)
 
     // On génère un email fictif basé sur le nom d'utilisateur
-    const fakeEmail = `${username.trim().toLowerCase()}@dashboard.local`
+    // Utilisation d'un domaine plus standard pour éviter les erreurs de validation
+    const fakeEmail = `${username.trim().toLowerCase()}@revisions-app.com`
 
     if (isSignUp) {
       const { error } = await supabase.auth.signUp({
