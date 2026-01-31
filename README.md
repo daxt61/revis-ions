@@ -16,11 +16,12 @@ Un dashboard collaboratif pour partager des "revis-ions" et des "n'oublions pas"
 ## Configuration
 
 1. **Variables d'environnement** :
-   Créez un fichier `.env.local` avec vos clés Supabase (déjà configuré dans ce projet).
+   Créez un fichier `.env.local` avec vos clés Supabase pour le développement local.
    ```
    NEXT_PUBLIC_SUPABASE_URL=...
    NEXT_PUBLIC_SUPABASE_ANON_KEY=...
    ```
+   **IMPORTANT (Vercel)** : Vous devez impérativement ajouter ces deux variables dans votre tableau de bord Vercel (Project Settings > Environment Variables) pour que l'application fonctionne une fois déployée.
 
 2. **Base de données** :
    Copiez le contenu de `supabase/schema.sql` et exécutez-le dans l'éditeur SQL de votre tableau de bord Supabase.
