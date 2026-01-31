@@ -1,0 +1,14 @@
+
+> dashboard@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+- Environments: .env.local
+
+✓ Starting...
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+✓ Ready in 1953ms
+○ Compiling /login ...
+ GET /login 200 in 6.2s (compile: 5.6s, proxy.ts: 170ms, render: 433ms)
