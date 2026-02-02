@@ -32,13 +32,26 @@ export default function LoginPage() {
     checkUser()
   }, [supabase, router])
 
+  const handleGuestLogin = async () => {
+    setLoading(true)
+    setError(null)
+    const { error } = await supabase.auth.signInAnonymously()
+    if (error) {
+      setError(error.message)
+    } else {
+      router.push('/')
+      router.refresh()
+    }
+    setLoading(false)
+  }
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
     // Automatically generate a technical email for Supabase if only a username is provided
-    const technicalEmail = username.includes('@') ? username : `${username.toLowerCase()}@dashboard.local`
+    const technicalEmail = username.includes('@') ? username : `${username.toLowerCase()}@user.internal`
 
     if (isSignUp) {
       const { error } = await supabase.auth.signUp({
@@ -50,8 +63,13 @@ export default function LoginPage() {
           },
         },
       })
-      if (error) setError(error.message)
-      else {
+      if (error) {
+        if (error.message.toLowerCase().includes('rate limit')) {
+          setError("Limite d'inscription atteinte. Pour corriger cela, désactivez 'Confirm Email' dans votre tableau de bord Supabase (Auth -> Settings).")
+        } else {
+          setError(error.message)
+        }
+      } else {
         alert('Compte créé avec succès ! Vous pouvez maintenant vous connecter.')
         setIsSignUp(false)
       }
@@ -60,8 +78,13 @@ export default function LoginPage() {
         email: technicalEmail,
         password,
       })
-      if (error) setError(error.message)
-      else {
+      if (error) {
+        if (error.message.toLowerCase().includes('rate limit')) {
+          setError("Limite de connexion atteinte. Veuillez réessayer dans quelques minutes.")
+        } else {
+          setError(error.message)
+        }
+      } else {
         if (rememberMe) {
           localStorage.setItem('rememberedUsername', username)
         } else {
@@ -119,13 +142,26 @@ export default function LoginPage() {
           )}
 
           {error && <p className="text-red-400 text-sm">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
-          >
-            {loading ? 'Chargement...' : isSignUp ? "S'inscrire" : 'Se connecter'}
-          </button>
+          <div className="space-y-3">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
+            >
+              {loading ? 'Chargement...' : isSignUp ? "S'inscrire" : 'Se connecter'}
+            </button>
+
+            {!isSignUp && (
+              <button
+                type="button"
+                onClick={handleGuestLogin}
+                disabled={loading}
+                className="w-full flex justify-center py-2 px-4 border border-gray-700 rounded-md shadow-sm text-sm font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 disabled:opacity-50 transition-colors"
+              >
+                Continuer en tant qu&apos;invité
+              </button>
+            )}
+          </div>
         </form>
         <div className="mt-4 text-center">
           <button
