@@ -143,7 +143,7 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
               <div key={i} className="relative w-20 h-20">
                 <img
                   src={URL.createObjectURL(image)}
-                  alt="preview"
+                  alt="aperçu de l'image"
                   className="w-full h-full object-cover rounded-lg border"
                 />
                 <button

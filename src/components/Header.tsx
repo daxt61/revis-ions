@@ -17,7 +17,7 @@ export default function Header({ user }: { user: any }) {
   return (
     <header className="bg-white border-b sticky top-0 z-30 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-blue-600 tracking-tight">Dashboard</h1>
+        <h1 className="text-xl font-bold text-blue-600 tracking-tight">Tableau de bord</h1>
 
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">

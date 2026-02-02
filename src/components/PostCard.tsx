@@ -106,7 +106,7 @@ export default function PostCard({ post, currentUser, onUpdate }: { post: any, c
               <img
                 key={i}
                 src={img}
-                alt="post image"
+                alt="image de la publication"
                 className="w-full aspect-square object-cover rounded-lg border shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
                 onClick={() => window.open(img, '_blank')}
               />
