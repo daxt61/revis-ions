@@ -50,9 +50,11 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
+    const technicalEmail = username.includes('@') ? username : `${username.toLowerCase()}@user.internal`
+
     if (isSignUp) {
       const { error } = await supabase.auth.signUp({
-        email: username,
+        email: technicalEmail,
         password,
         options: {
           data: {
@@ -72,7 +74,7 @@ export default function LoginPage() {
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({
-        email: username,
+        email: technicalEmail,
         password,
       })
       if (error) {
@@ -165,7 +167,7 @@ export default function LoginPage() {
             onClick={() => setIsSignUp(!isSignUp)}
             className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
           >
-            {isSignUp ? 'Déjà un compte ? Se connecter' : "Pas de compte ? S'inscrire"}
+            {isSignUp ? 'Déjà un compte ? Se connecter' : "Pas de compte ? S&apos;inscrire"}
           </button>
         </div>
       </div>
