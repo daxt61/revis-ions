@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 
@@ -13,6 +13,16 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        router.push('/')
+      }
+    }
+    checkUser()
+  }, [supabase, router])
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -57,7 +67,7 @@ export default function LoginPage() {
         <form onSubmit={handleAuth} className="space-y-4">
           {isSignUp && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">Nom d'utilisateur</label>
+              <label className="block text-sm font-medium text-gray-700">Nom d&apos;utilisateur</label>
               <input
                 type="text"
                 value={username}
@@ -93,7 +103,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
           >
-            {loading ? 'Chargement...' : isSignUp ? 'S\'inscrire' : 'Se connecter'}
+            {loading ? 'Chargement...' : isSignUp ? "S'inscrire" : 'Se connecter'}
           </button>
         </form>
         <div className="mt-4 text-center">
@@ -101,7 +111,7 @@ export default function LoginPage() {
             onClick={() => setIsSignUp(!isSignUp)}
             className="text-sm text-blue-600 hover:text-blue-500"
           >
-            {isSignUp ? 'Déjà un compte ? Se connecter' : 'Pas de compte ? S\'inscrire'}
+            {isSignUp ? 'Déjà un compte ? Se connecter' : "Pas de compte ? S'inscrire"}
           </button>
         </div>
       </div>
