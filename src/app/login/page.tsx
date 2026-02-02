@@ -5,7 +5,6 @@ import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
   const [isSignUp, setIsSignUp] = useState(false)
@@ -16,10 +15,10 @@ export default function LoginPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    const savedEmail = localStorage.getItem('rememberedEmail')
-    if (savedEmail) {
+    const savedUsername = localStorage.getItem('rememberedUsername')
+    if (savedUsername) {
       setTimeout(() => {
-        setEmail(savedEmail)
+        setUsername(savedUsername)
         setRememberMe(true)
       }, 0)
     }
@@ -38,9 +37,12 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
+    // Automatically generate a technical email for Supabase if only a username is provided
+    const technicalEmail = username.includes('@') ? username : `${username.toLowerCase()}@dashboard.local`
+
     if (isSignUp) {
       const { error } = await supabase.auth.signUp({
-        email,
+        email: technicalEmail,
         password,
         options: {
           data: {
@@ -50,20 +52,20 @@ export default function LoginPage() {
       })
       if (error) setError(error.message)
       else {
-        alert('Vérifiez vos emails pour confirmer votre inscription !')
+        alert('Compte créé avec succès ! Vous pouvez maintenant vous connecter.')
         setIsSignUp(false)
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
+        email: technicalEmail,
         password,
       })
       if (error) setError(error.message)
       else {
         if (rememberMe) {
-          localStorage.setItem('rememberedEmail', email)
+          localStorage.setItem('rememberedUsername', username)
         } else {
-          localStorage.removeItem('rememberedEmail')
+          localStorage.removeItem('rememberedUsername')
         }
         router.push('/')
         router.refresh()
@@ -79,25 +81,14 @@ export default function LoginPage() {
           {isSignUp ? 'Créer un compte' : 'Se connecter'}
         </h1>
         <form onSubmit={handleAuth} className="space-y-4">
-          {isSignUp && (
-            <div>
-              <label className="block text-sm font-medium text-gray-300">Nom d&apos;utilisateur</label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md shadow-sm text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                required
-              />
-            </div>
-          )}
           <div>
-            <label className="block text-sm font-medium text-gray-300">Email ou Username</label>
+            <label className="block text-sm font-medium text-gray-300">Nom d&apos;utilisateur</label>
             <input
               type="text"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="mt-1 block w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md shadow-sm text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="votre_pseudo"
               required
             />
           </div>
