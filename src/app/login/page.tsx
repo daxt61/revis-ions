@@ -50,12 +50,9 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
-    // Automatically generate a technical email for Supabase if only a username is provided
-    const technicalEmail = username.includes('@') ? username : `${username.toLowerCase()}@user.internal`
-
     if (isSignUp) {
       const { error } = await supabase.auth.signUp({
-        email: technicalEmail,
+        email: username,
         password,
         options: {
           data: {
@@ -75,7 +72,7 @@ export default function LoginPage() {
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({
-        email: technicalEmail,
+        email: username,
         password,
       })
       if (error) {
