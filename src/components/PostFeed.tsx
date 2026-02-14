@@ -1,19 +1,48 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import PostCard from './PostCard'
 import CreatePost from './CreatePost'
 import { Search, Filter } from 'lucide-react'
+import { Post } from '@/types'
 
-export default function PostFeed({ user }: { user: any }) {
-  const [posts, setPosts] = useState<any[]>([])
+function PostSkeleton() {
+  return (
+    <div className="bg-card rounded-2xl shadow-md border border-border overflow-hidden flex animate-pulse">
+      <div className="bg-muted/20 w-12 flex flex-col items-center py-4 gap-4 border-r border-border">
+        <div className="w-6 h-6 bg-muted rounded" />
+        <div className="w-4 h-4 bg-muted rounded" />
+        <div className="w-6 h-6 bg-muted rounded" />
+      </div>
+      <div className="flex-1 p-4 space-y-4">
+        <div className="flex gap-2">
+          <div className="w-20 h-4 bg-muted rounded-full" />
+          <div className="w-24 h-4 bg-muted rounded-full" />
+        </div>
+        <div className="w-2/3 h-6 bg-muted rounded" />
+        <div className="space-y-2">
+          <div className="w-full h-4 bg-muted rounded" />
+          <div className="w-full h-4 bg-muted rounded" />
+          <div className="w-4/5 h-4 bg-muted rounded" />
+        </div>
+        <div className="flex gap-2">
+          <div className="w-16 h-6 bg-muted rounded-full" />
+          <div className="w-24 h-6 bg-muted rounded-full" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function PostFeed({ user }: { user: { id: string } }) {
+  const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [subjectFilter, setSubjectFilter] = useState('')
   const supabase = createClient()
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     setLoading(true)
     let query = supabase
       .from('posts')
@@ -28,49 +57,67 @@ export default function PostFeed({ user }: { user: any }) {
       query = query.ilike('subject', `%${subjectFilter}%`)
     }
 
-    const { data, error } = await query
-    if (data) setPosts(data)
+    const { data } = await query
+    if (data) setPosts(data as unknown as Post[])
     setLoading(false)
-  }
+  }, [search, subjectFilter, supabase])
+
+  const fetchPostsRef = useRef(fetchPosts)
+  useEffect(() => {
+    fetchPostsRef.current = fetchPosts
+  }, [fetchPosts])
 
   useEffect(() => {
-    fetchPosts()
+    setTimeout(() => {
+      fetchPosts()
+    }, 0)
+  }, [fetchPosts])
 
-    // Realtime for new posts
+  useEffect(() => {
+    // Realtime for posts, votes and comments
     const channel = supabase
-      .channel('public:posts')
+      .channel('public:feed_changes')
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .on('postgres_changes' as any, { event: '*', table: 'posts' }, () => {
-        fetchPosts()
+        fetchPostsRef.current()
+      })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .on('postgres_changes' as any, { event: '*', table: 'votes' }, () => {
+        fetchPostsRef.current()
+      })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .on('postgres_changes' as any, { event: '*', table: 'comments' }, () => {
+        fetchPostsRef.current()
       })
       .subscribe()
 
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [search, subjectFilter])
+  }, [supabase])
 
   return (
     <div className="space-y-6 pb-20">
       <CreatePost user={user} onPostCreated={fetchPosts} />
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 bg-white p-3 rounded-xl shadow-sm border">
+      <div className="flex flex-col sm:flex-row gap-3 bg-card p-3 rounded-2xl shadow-md border border-border">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
           <input
             type="text"
             placeholder="Rechercher..."
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+            className="w-full pl-10 pr-4 py-2 bg-muted/30 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-sm text-foreground placeholder:text-muted-foreground transition-all"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
         <div className="relative w-full sm:w-48">
-          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
           <input
             type="text"
             placeholder="Matière..."
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+            className="w-full pl-10 pr-4 py-2 bg-muted/30 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent text-sm text-foreground placeholder:text-muted-foreground transition-all"
             value={subjectFilter}
             onChange={(e) => setSubjectFilter(e.target.value)}
           />
@@ -78,17 +125,25 @@ export default function PostFeed({ user }: { user: any }) {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-10">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="space-y-4">
+          <PostSkeleton />
+          <PostSkeleton />
+          <PostSkeleton />
         </div>
       ) : (
         <div className="space-y-4">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} currentUser={user} onUpdate={fetchPosts} />
+            <div key={post.id} className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <PostCard post={post} currentUser={user} onUpdate={fetchPosts} />
+            </div>
           ))}
           {posts.length === 0 && (
-            <div className="text-center py-10 bg-white rounded-xl border border-dashed border-gray-300">
-              <p className="text-gray-500">Aucune publication trouvée.</p>
+            <div className="text-center py-20 bg-card rounded-2xl border border-dashed border-border">
+              <div className="bg-muted/30 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Search size={24} className="text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground font-medium">Aucune publication trouvée.</p>
+              <p className="text-xs text-muted-foreground/60 mt-1">Essayez de modifier vos filtres.</p>
             </div>
           )}
         </div>

@@ -24,6 +24,17 @@ export default function LoginPage() {
     checkUser()
   }, [supabase, router])
 
+  const handleGuestSignIn = async () => {
+    setLoading(true)
+    const { error } = await supabase.auth.signInAnonymously()
+    if (error) setError(error.message)
+    else {
+      router.push('/')
+      router.refresh()
+    }
+    setLoading(false)
+  }
+
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -59,57 +70,70 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-md">
-        <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">
-          {isSignUp ? 'Créer un compte' : 'Se connecter'}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background text-foreground p-4">
+      <div className="w-full max-w-md p-8 bg-card rounded-3xl shadow-2xl border border-border animate-in fade-in zoom-in duration-500">
+        <h1 className="text-3xl font-black mb-8 text-center text-primary tracking-tight">
+          {isSignUp ? 'Créer un compte' : 'Bienvenue'}
         </h1>
-        <form onSubmit={handleAuth} className="space-y-4">
+        <form onSubmit={handleAuth} className="space-y-5">
           {isSignUp && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Nom d&apos;utilisateur</label>
+            <div className="space-y-1.5">
+              <label className="block text-sm font-semibold text-muted-foreground ml-1">Nom d&apos;utilisateur</label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full bg-muted/30 border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
                 required
               />
             </div>
           )}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-semibold text-muted-foreground ml-1">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full bg-muted/30 border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
               required
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Mot de passe</label>
+          <div className="space-y-1.5">
+            <label className="block text-sm font-semibold text-muted-foreground ml-1">Mot de passe</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full bg-muted/30 border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all"
               required
             />
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-destructive text-xs bg-destructive/10 p-3 rounded-lg border border-destructive/20">{error}</p>}
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            className="w-full flex justify-center py-3 px-4 rounded-xl shadow-lg shadow-primary/20 text-sm font-bold text-primary-foreground bg-primary hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 transition-all active:scale-[0.98]"
           >
-            {loading ? 'Chargement...' : isSignUp ? "S'inscrire" : 'Se connecter'}
+            {loading ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary-foreground border-t-transparent"></div>
+            ) : isSignUp ? "S'inscrire" : 'Se connecter'}
           </button>
         </form>
-        <div className="mt-4 text-center">
+
+        <div className="mt-6 pt-6 border-t border-border">
+          <button
+            onClick={handleGuestSignIn}
+            disabled={loading}
+            className="w-full flex justify-center py-3 px-4 rounded-xl border border-primary text-primary text-sm font-bold hover:bg-primary/10 transition-all disabled:opacity-50"
+          >
+            Continuer en tant qu&apos;invité
+          </button>
+        </div>
+
+        <div className="mt-6 text-center">
           <button
             onClick={() => setIsSignUp(!isSignUp)}
-            className="text-sm text-blue-600 hover:text-blue-500"
+            className="text-sm font-medium text-primary hover:underline decoration-2 underline-offset-4 transition-all"
           >
             {isSignUp ? 'Déjà un compte ? Se connecter' : "Pas de compte ? S'inscrire"}
           </button>

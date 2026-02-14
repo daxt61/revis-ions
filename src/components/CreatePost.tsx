@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { ImagePlus, X, Send } from 'lucide-react'
 
-export default function CreatePost({ user, onPostCreated }: { user: any, onPostCreated: () => void }) {
+export default function CreatePost({ user, onPostCreated }: { user: { id: string }, onPostCreated: () => void }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [type, setType] = useState<'revis-ions' | "n'oublions pas">('revis-ions')
@@ -73,22 +73,22 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
       setDueDate('')
       setImages([])
       onPostCreated()
-    } catch (error: any) {
-      alert(error.message)
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : 'Une erreur est survenue')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-4">
+    <div className="bg-card rounded-2xl shadow-md border border-border p-4 transition-all focus-within:ring-2 focus-within:ring-primary/20">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex gap-2 p-1 bg-gray-100 rounded-lg w-fit">
+        <div className="flex gap-2 p-1 bg-muted/50 rounded-xl w-fit border border-border">
           <button
             type="button"
             onClick={() => setType('revis-ions')}
-            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-              type === 'revis-ions' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'
+            className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+              type === 'revis-ions' ? 'bg-card shadow-sm text-primary' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Revis-ions
@@ -96,72 +96,78 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
           <button
             type="button"
             onClick={() => setType("n'oublions pas")}
-            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-              type === "n'oublions pas" ? 'bg-white shadow text-orange-600' : 'text-gray-500 hover:text-gray-700'
+            className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+              type === "n'oublions pas" ? 'bg-card shadow-sm text-orange-500' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            N'oublions pas
+            N&apos;oublions pas
           </button>
         </div>
 
         <input
           type="text"
-          placeholder="Titre..."
-          className="w-full text-lg font-bold border-none focus:ring-0 p-0"
+          placeholder="Titre de votre publication"
+          className="w-full text-xl font-bold bg-transparent border-none focus:ring-0 p-0 text-foreground placeholder:text-muted-foreground"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
         />
 
         <textarea
-          placeholder="Description..."
-          className="w-full border-none focus:ring-0 p-0 resize-none min-h-[80px]"
+          placeholder="Partagez vos notes, rappels ou questions..."
+          className="w-full bg-transparent border-none focus:ring-0 p-0 resize-none min-h-[100px] text-foreground placeholder:text-muted-foreground"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
 
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            placeholder="Matière (ex: Math)"
-            className="text-sm border-gray-200 rounded-lg"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-          />
-          <input
-            type="date"
-            className="text-sm border-gray-200 rounded-lg"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Matière (ex: Mathématiques)"
+              className="w-full text-sm bg-muted/30 border border-border rounded-xl px-4 py-2 text-foreground placeholder:text-muted-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+            />
+          </div>
+          <div className="relative">
+            <input
+              type="date"
+              className="w-full text-sm bg-muted/30 border border-border rounded-xl px-4 py-2 text-foreground focus:ring-2 focus:ring-primary focus:border-transparent transition-all [color-scheme:dark]"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
+          </div>
         </div>
 
         {/* Image Previews */}
         {images.length > 0 && (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {images.map((image, i) => (
-              <div key={i} className="relative w-20 h-20">
+              <div key={i} className="relative w-24 h-24 group">
                 <img
                   src={URL.createObjectURL(image)}
                   alt="preview"
-                  className="w-full h-full object-cover rounded-lg border"
+                  className="w-full h-full object-cover rounded-xl border border-border"
                 />
                 <button
                   type="button"
                   onClick={() => removeImage(i)}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md"
+                  className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1.5 shadow-lg scale-0 group-hover:scale-100 transition-transform"
                 >
-                  <X size={12} />
+                  <X size={14} />
                 </button>
               </div>
             ))}
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-2 border-t">
-          <label className="flex items-center gap-2 text-gray-500 hover:text-blue-600 cursor-pointer transition-colors">
-            <ImagePlus size={20} />
-            <span className="text-sm font-medium">Ajouter images ({images.length}/3)</span>
+        <div className="flex items-center justify-between pt-4 border-t border-border">
+          <label className="flex items-center gap-2 text-muted-foreground hover:text-primary cursor-pointer transition-colors group">
+            <div className="p-2 bg-muted/50 rounded-full group-hover:bg-primary/10 transition-colors">
+              <ImagePlus size={20} />
+            </div>
+            <span className="text-sm font-medium">Images ({images.length}/3)</span>
             <input
               type="file"
               accept="image/*"
@@ -175,9 +181,11 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
           <button
             type="submit"
             disabled={loading || !title}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="bg-primary text-primary-foreground px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 disabled:opacity-50 transition-all active:scale-95 shadow-lg shadow-primary/20"
           >
-            {loading ? 'Publication...' : (
+            {loading ? (
+              <div className="animate-spin rounded-full h-5 w-5 border-2 border-primary-foreground border-t-transparent"></div>
+            ) : (
               <>
                 <Send size={18} />
                 Publier
