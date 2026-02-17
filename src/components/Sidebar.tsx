@@ -2,13 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-
-type Profile = {
-  id: string
-  username: string
-  avatar_url: string
-  online?: boolean
-}
+import { Profile } from '@/types'
+import { Users } from 'lucide-react'
 
 export default function Sidebar() {
   const [profiles, setProfiles] = useState<Profile[]>([])
@@ -17,30 +12,26 @@ export default function Sidebar() {
 
   useEffect(() => {
     const fetchProfiles = async () => {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('profiles')
         .select('*')
-      if (data) setProfiles(data)
+      if (data) setProfiles(data as Profile[])
     }
 
-    fetchProfiles()
+    void fetchProfiles()
 
     // Realtime Presence
     const channel = supabase.channel('online-users')
-    channel
-      .on('presence' as any, { event: 'sync' }, () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    channel.on('presence' as any, { event: 'sync' }, () => {
         const state = channel.presenceState()
         const onlineIds = new Set<string>()
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         Object.values(state).forEach((presences: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           presences.forEach((p: any) => onlineIds.add(p.user_id))
         })
         setOnlineUsers(onlineIds)
-      })
-      .on('presence' as any, { event: 'join' }, ({ key, newPresences }: any) => {
-        // console.log('join', key, newPresences)
-      })
-      .on('presence' as any, { event: 'leave' }, ({ key, leftPresences }: any) => {
-        // console.log('leave', key, leftPresences)
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
@@ -52,32 +43,43 @@ export default function Sidebar() {
       })
 
     return () => {
-      supabase.removeChannel(channel)
+      void supabase.removeChannel(channel)
     }
   }, [supabase])
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-4 sticky top-20">
-      <h2 className="font-semibold mb-4 text-gray-800 border-b pb-2">Utilisateurs</h2>
-      <ul className="space-y-3">
+    <div className="bg-card rounded-3xl shadow-lg border border-border p-5 sticky top-24">
+      <div className="flex items-center gap-2 mb-6 border-b border-border pb-3">
+        <Users size={20} className="text-primary" />
+        <h2 className="font-bold text-foreground">Utilisateurs</h2>
+      </div>
+
+      <ul className="space-y-4">
         {profiles.map((profile) => (
-          <li key={profile.id} className="flex items-center gap-3">
+          <li key={profile.id} className="flex items-center gap-3 group">
             <div className="relative">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xs">
+              <div className="w-10 h-10 bg-primary/10 rounded-2xl flex items-center justify-center text-primary font-bold text-sm border border-primary/20 transition-all group-hover:scale-105">
                 {profile.username?.charAt(0).toUpperCase() || '?'}
               </div>
               <div
-                className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${
-                  onlineUsers.has(profile.id) ? 'bg-green-500' : 'bg-red-500'
+                className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-card ${
+                  onlineUsers.has(profile.id) ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.5)]'
                 }`}
               />
             </div>
-            <span className="text-sm font-medium text-gray-700 truncate">
-              {profile.username || 'Anonyme'}
-            </span>
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors">
+                {profile.username || 'Anonyme'}
+              </span>
+              <span className="text-[10px] text-muted-foreground uppercase font-medium">
+                {onlineUsers.has(profile.id) ? 'En ligne' : 'Hors ligne'}
+              </span>
+            </div>
           </li>
         ))}
-        {profiles.length === 0 && <p className="text-xs text-gray-500">Aucun utilisateur</p>}
+        {profiles.length === 0 && (
+          <p className="text-xs text-muted-foreground italic text-center py-4">Aucun utilisateur</p>
+        )}
       </ul>
     </div>
   )
