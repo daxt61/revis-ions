@@ -2,9 +2,10 @@
 
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
-import { LogOut, User } from 'lucide-react'
+import { LogOut, User, LayoutDashboard } from 'lucide-react'
+import { User as UserType } from '@supabase/supabase-js'
 
-export default function Header({ user }: { user: any }) {
+export default function Header({ user }: { user: UserType }) {
   const supabase = createClient()
   const router = useRouter()
 
@@ -15,23 +16,24 @@ export default function Header({ user }: { user: any }) {
   }
 
   return (
-    <header className="bg-white border-b sticky top-0 z-30 shadow-sm">
+    <header className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-30 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-blue-600 tracking-tight">Dashboard</h1>
+        <div className="flex items-center gap-2">
+          <LayoutDashboard className="text-blue-500" size={24} />
+          <h1 className="text-xl font-bold text-foreground tracking-tight">Hub</h1>
+        </div>
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="bg-gray-200 p-2 rounded-full">
-              <User size={18} className="text-gray-600" />
-            </div>
-            <span className="hidden sm:inline text-sm font-medium text-gray-700">
+          <div className="flex items-center gap-2 bg-card px-3 py-1.5 rounded-full border border-border">
+            <User size={16} className="text-blue-400" />
+            <span className="hidden sm:inline text-xs font-semibold text-foreground">
               {user.user_metadata?.username || user.email}
             </span>
           </div>
 
           <button
-            onClick={handleSignOut}
-            className="p-2 text-gray-500 hover:text-red-600 transition-colors"
+            onClick={() => void handleSignOut()}
+            className="p-2 text-foreground/60 hover:text-red-500 hover:bg-red-500/10 rounded-full transition-all"
             title="Déconnexion"
           >
             <LogOut size={20} />
