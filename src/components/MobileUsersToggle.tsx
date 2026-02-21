@@ -9,25 +9,27 @@ export default function MobileUsersToggle() {
 
   return (
     <div className="lg:hidden">
+      {/* Floating Button - Positioned to the left */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-white border text-blue-600 rounded-full shadow-lg flex items-center justify-center z-40"
+        className="fixed bottom-6 left-6 w-16 h-16 bg-card border border-border text-primary rounded-2xl shadow-2xl flex items-center justify-center z-40 hover:scale-110 active:scale-95 shadow-primary/5"
       >
-        <Users size={24} />
+        <Users size={28} />
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
-          <div className="w-64 bg-white h-full p-4 relative animate-in slide-in-from-right">
-            <button
-              onClick={() => setIsOpen(false)}
-              className="absolute top-4 right-4 p-1 text-gray-500"
-            >
-              <X size={20} />
-            </button>
-            <div className="mt-8">
-              <Sidebar />
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex justify-start">
+          <div className="w-72 bg-card h-full p-6 relative animate-in slide-in-from-left shadow-2xl border-r border-border">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-xl font-black text-foreground uppercase tracking-tighter">Communauté</h2>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-2 text-muted hover:text-foreground bg-background rounded-xl border border-border"
+              >
+                <X size={20} />
+              </button>
             </div>
+            <Sidebar />
           </div>
         </div>
       )}
