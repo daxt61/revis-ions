@@ -29,24 +29,27 @@ export default function LoginPage() {
     setLoading(true)
     setError(null)
 
+    // Conversion du username en email technique pour Supabase Auth
+    const technicalEmail = email.includes('@') ? email : `${email}@user.internal`
+
     if (isSignUp) {
       const { error } = await supabase.auth.signUp({
-        email,
+        email: technicalEmail,
         password,
         options: {
           data: {
-            username: username,
+            username: username || email,
           },
         },
       })
       if (error) setError(error.message)
       else {
-        alert('Vérifiez vos emails pour confirmer votre inscription !')
         setIsSignUp(false)
+        setError("Compte créé ! Vous pouvez maintenant vous connecter.")
       }
     } else {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
+        email: technicalEmail,
         password,
       })
       if (error) setError(error.message)
@@ -58,61 +61,109 @@ export default function LoginPage() {
     setLoading(false)
   }
 
+  const handleGuestLogin = async () => {
+    setLoading(true)
+    const { error } = await supabase.auth.signInAnonymously()
+    if (error) setError(error.message)
+    else {
+      router.push('/')
+      router.refresh()
+    }
+    setLoading(false)
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-md">
-        <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">
-          {isSignUp ? 'Créer un compte' : 'Se connecter'}
-        </h1>
-        <form onSubmit={handleAuth} className="space-y-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4 font-sans">
+      <div className="w-full max-w-md p-8 bg-card rounded-3xl border border-border shadow-2xl shadow-black/50">
+        <div className="flex justify-center mb-8">
+          <div className="bg-primary/10 p-4 rounded-2xl border border-primary/20">
+            <h1 className="text-3xl font-black text-primary tracking-tighter">HUB</h1>
+          </div>
+        </div>
+
+        <h2 className="text-xl font-bold mb-6 text-center text-foreground uppercase tracking-widest">
+          {isSignUp ? 'Créer un compte' : 'Connexion'}
+        </h2>
+
+        <form onSubmit={handleAuth} className="space-y-5">
           {isSignUp && (
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Nom d&apos;utilisateur</label>
+            <div className="space-y-1">
+              <label className="block text-[10px] font-black uppercase text-muted-foreground ml-1">Nom d&apos;utilisateur</label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-4 py-3 bg-muted/50 border border-transparent rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary outline-none text-foreground transition-all"
+                placeholder="Ex: JeanDupont"
                 required
               />
             </div>
           )}
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+          <div className="space-y-1">
+            <label className="block text-[10px] font-black uppercase text-muted-foreground ml-1">
+              {isSignUp ? 'Email' : 'Nom d\'utilisateur ou Email'}
+            </label>
             <input
-              type="email"
+              type={isSignUp ? "email" : "text"}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 bg-muted/50 border border-transparent rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary outline-none text-foreground transition-all"
+              placeholder={isSignUp ? "email@exemple.com" : "Votre identifiant"}
               required
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Mot de passe</label>
+          <div className="space-y-1">
+            <label className="block text-[10px] font-black uppercase text-muted-foreground ml-1">Mot de passe</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="w-full px-4 py-3 bg-muted/50 border border-transparent rounded-2xl focus:border-primary focus:ring-1 focus:ring-primary outline-none text-foreground transition-all"
+              placeholder="••••••••"
               required
             />
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+
+          {error && (
+            <div className="bg-destructive/10 border border-destructive/20 text-destructive text-xs font-bold p-3 rounded-xl text-center">
+              {error}
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            className="w-full py-3 px-4 bg-primary text-white rounded-2xl font-black uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 disabled:opacity-50 active:scale-95"
           >
-            {loading ? 'Chargement...' : isSignUp ? "S'inscrire" : 'Se connecter'}
+            {loading ? 'Chargement...' : isSignUp ? "S'inscrire" : 'Entrer'}
           </button>
         </form>
-        <div className="mt-4 text-center">
+
+        <div className="mt-8 space-y-4">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-border"></div>
+            </div>
+            <div className="relative flex justify-center text-[10px] uppercase font-bold tracking-tighter">
+              <span className="bg-card px-2 text-muted-foreground">Ou continuer avec</span>
+            </div>
+          </div>
+
           <button
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="text-sm text-blue-600 hover:text-blue-500"
+            onClick={handleGuestLogin}
+            className="w-full py-3 px-4 bg-muted/50 text-foreground border border-border rounded-2xl font-bold hover:bg-muted transition-all flex items-center justify-center gap-2"
           >
-            {isSignUp ? 'Déjà un compte ? Se connecter' : "Pas de compte ? S'inscrire"}
+            Accès Invité
           </button>
+
+          <div className="text-center pt-2">
+            <button
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-xs font-bold text-muted-foreground hover:text-primary transition-colors"
+            >
+              {isSignUp ? 'DÉJÀ UN COMPTE ? SE CONNECTER' : "PAS DE COMPTE ? CRÉER UN COMPTE"}
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -4,13 +4,19 @@ import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { ArrowBigUp, ArrowBigDown, MessageCircle, Calendar, BookOpen } from 'lucide-react'
 import CommentSection from './CommentSection'
+import { type User } from '@supabase/supabase-js'
+import { formatDistanceToNow } from 'date-fns'
+import { fr } from 'date-fns/locale'
 
-export default function PostCard({ post, currentUser, onUpdate }: { post: any, currentUser: any, onUpdate: () => void }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default function PostCard({ post, currentUser, onUpdate }: { post: any, currentUser: User, onUpdate: () => void }) {
   const [voting, setVoting] = useState(false)
   const [showComments, setShowComments] = useState(false)
   const supabase = createClient()
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const userVote = post.votes?.find((v: any) => v.user_id === currentUser.id)?.value || 0
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const score = post.votes?.reduce((acc: number, v: any) => acc + v.value, 0) || 0
 
   const handleVote = async (value: number) => {
@@ -41,94 +47,95 @@ export default function PostCard({ post, currentUser, onUpdate }: { post: any, c
   const isNoublionsPas = post.type === "n'oublions pas"
 
   return (
-    <div className={`bg-white rounded-xl shadow-sm border overflow-hidden flex ${isNoublionsPas ? 'border-l-4 border-l-orange-500' : 'border-l-4 border-l-blue-500'}`}>
+    <div className={`bg-card rounded-2xl border border-border overflow-hidden flex shadow-lg transition-all hover:shadow-primary/5 hover:border-primary/20 ${isNoublionsPas ? 'border-l-4 border-l-orange-500' : 'border-l-4 border-l-primary'}`}>
       {/* Vote Sidebar */}
-      <div className="bg-gray-50 w-12 flex flex-col items-center py-2 gap-1 border-r">
+      <div className="bg-muted/30 w-14 flex flex-col items-center py-4 gap-2 border-r border-border">
         <button
           onClick={() => handleVote(1)}
-          className={`p-1 rounded transition-colors ${userVote === 1 ? 'text-orange-600 bg-orange-50' : 'text-gray-400 hover:bg-gray-200'}`}
+          className={`p-1.5 rounded-xl transition-all ${userVote === 1 ? 'text-orange-500 bg-orange-500/10' : 'text-muted-foreground hover:bg-muted'}`}
         >
-          <ArrowBigUp size={24} fill={userVote === 1 ? 'currentColor' : 'none'} />
+          <ArrowBigUp size={28} fill={userVote === 1 ? 'currentColor' : 'none'} />
         </button>
-        <span className={`text-sm font-bold ${score > 0 ? 'text-orange-600' : score < 0 ? 'text-blue-600' : 'text-gray-700'}`}>
+        <span className={`text-base font-black ${score > 0 ? 'text-orange-500' : score < 0 ? 'text-primary' : 'text-muted-foreground'}`}>
           {score}
         </span>
         <button
           onClick={() => handleVote(-1)}
-          className={`p-1 rounded transition-colors ${userVote === -1 ? 'text-blue-600 bg-blue-50' : 'text-gray-400 hover:bg-gray-200'}`}
+          className={`p-1.5 rounded-xl transition-all ${userVote === -1 ? 'text-primary bg-primary/10' : 'text-muted-foreground hover:bg-muted'}`}
         >
-          <ArrowBigDown size={24} fill={userVote === -1 ? 'currentColor' : 'none'} />
+          <ArrowBigDown size={28} fill={userVote === -1 ? 'currentColor' : 'none'} />
         </button>
       </div>
 
       {/* Content */}
-      <div className="flex-1 p-4">
-        <div className="flex items-center gap-2 mb-2">
-          <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
-            isNoublionsPas ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
+      <div className="flex-1 p-5 sm:p-6">
+        <div className="flex flex-wrap items-center gap-y-2 gap-x-3 mb-4">
+          <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-lg ${
+            isNoublionsPas ? 'bg-orange-500/10 text-orange-500 border border-orange-500/20' : 'bg-primary/10 text-primary border border-primary/20'
           }`}>
             {post.type}
           </span>
-          <span className="text-xs text-gray-400">•</span>
-          <span className="text-xs text-gray-500">
-            Posté par <span className="font-semibold text-gray-700">{post.profiles?.username || 'Anonyme'}</span>
-          </span>
-          <span className="text-xs text-gray-400">•</span>
-          <span className="text-xs text-gray-400">
-            {new Date(post.created_at).toLocaleDateString()}
-          </span>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium">
+            <div className="w-1 h-1 bg-muted-foreground/30 rounded-full" />
+            <span>Posté par <span className="text-foreground font-bold">{post.profiles?.username || 'Anonyme'}</span></span>
+            <div className="w-1 h-1 bg-muted-foreground/30 rounded-full" />
+            <span>{formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: fr })}</span>
+          </div>
         </div>
 
-        <h3 className="text-lg font-bold text-gray-900 mb-1">{post.title}</h3>
+        <h3 className="text-xl font-black text-foreground mb-2 leading-tight">{post.title}</h3>
         {post.description && (
-          <p className="text-gray-600 text-sm mb-4 line-clamp-3 whitespace-pre-wrap">{post.description}</p>
+          <p className="text-muted-foreground text-sm mb-5 line-clamp-4 whitespace-pre-wrap leading-relaxed">{post.description}</p>
         )}
 
-        <div className="flex flex-wrap gap-3 mb-4">
+        <div className="flex flex-wrap gap-3 mb-6">
           {post.subject && (
-            <div className="flex items-center gap-1.5 text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-md">
-              <BookOpen size={14} />
+            <div className="flex items-center gap-2 text-xs font-bold bg-muted/50 text-foreground px-3 py-1.5 rounded-xl border border-border">
+              <BookOpen size={14} className="text-primary" />
               {post.subject}
             </div>
           )}
           {post.due_date && (
-            <div className="flex items-center gap-1.5 text-xs bg-red-50 text-red-600 px-2 py-1 rounded-md font-medium">
+            <div className="flex items-center gap-2 text-xs font-bold bg-rose-500/10 text-rose-500 px-3 py-1.5 rounded-xl border border-rose-500/20">
               <Calendar size={14} />
-              Échéance : {new Date(post.due_date).toLocaleDateString()}
+              Échéance : {new Date(post.due_date).toLocaleDateString('fr-FR')}
             </div>
           )}
         </div>
 
         {/* Images */}
         {post.images && post.images.length > 0 && (
-          <div className={`grid gap-2 mb-4 ${post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2 sm:grid-cols-3'}`}>
+          <div className={`grid gap-3 mb-6 ${post.images.length === 1 ? 'grid-cols-1' : 'grid-cols-2 sm:grid-cols-3'}`}>
             {post.images.map((img: string, i: number) => (
-              <img
-                key={i}
-                src={img}
-                alt="post image"
-                className="w-full aspect-square object-cover rounded-lg border shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
-                onClick={() => window.open(img, '_blank')}
-              />
+              <div key={i} className="group relative aspect-square overflow-hidden rounded-2xl border border-border shadow-md">
+                <img
+                  src={img}
+                  alt="post image"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 cursor-pointer"
+                  onClick={() => window.open(img, '_blank')}
+                />
+              </div>
             ))}
           </div>
         )}
 
         {/* Footer */}
-        <div className="flex items-center gap-4 pt-2 border-t mt-2">
+        <div className="flex items-center gap-4 pt-4 border-t border-border">
           <button
             onClick={() => setShowComments(!showComments)}
-            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors text-sm font-medium ${
-              showComments ? 'text-blue-600 bg-blue-50' : 'text-gray-500 hover:bg-gray-100'
+            className={`flex items-center gap-2.5 px-4 py-2 rounded-xl transition-all text-sm font-bold ${
+              showComments ? 'text-primary bg-primary/10 ring-1 ring-primary/20' : 'text-muted-foreground hover:bg-muted hover:text-foreground'
             }`}
           >
-            <MessageCircle size={18} />
-            {post.comments[0]?.count || 0} Commentaires
+            <MessageCircle size={20} />
+            {post.comments[0]?.count || 0} <span className="hidden sm:inline">Commentaires</span>
           </button>
         </div>
 
         {showComments && (
-          <CommentSection post={post} currentUser={currentUser} />
+          <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+            <CommentSection post={post} currentUser={currentUser} />
+          </div>
         )}
       </div>
     </div>
