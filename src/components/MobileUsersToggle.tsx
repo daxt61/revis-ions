@@ -11,17 +11,17 @@ export default function MobileUsersToggle() {
     <div className="lg:hidden">
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-white border text-blue-600 rounded-full shadow-lg flex items-center justify-center z-40"
+        className="fixed bottom-6 left-6 w-14 h-14 bg-card border border-border text-blue-500 rounded-full shadow-lg flex items-center justify-center z-40"
       >
         <Users size={24} />
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex justify-end">
-          <div className="w-64 bg-white h-full p-4 relative animate-in slide-in-from-right">
+        <div className="fixed inset-0 bg-black/60 z-50 flex justify-start">
+          <div className="w-64 bg-card h-full p-4 relative animate-in slide-in-from-left border-r border-border">
             <button
               onClick={() => setIsOpen(false)}
-              className="absolute top-4 right-4 p-1 text-gray-500"
+              className="absolute top-4 right-4 p-1 text-gray-500 hover:text-white transition-colors"
             >
               <X size={20} />
             </button>
