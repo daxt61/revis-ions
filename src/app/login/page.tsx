@@ -21,7 +21,7 @@ export default function LoginPage() {
         router.push('/')
       }
     }
-    checkUser()
+    void checkUser()
   }, [supabase, router])
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -59,57 +59,60 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-md">
-        <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4 font-sans">
+      <div className="w-full max-w-md p-8 bg-card rounded-2xl border border-border shadow-xl">
+        <h1 className="text-3xl font-bold mb-8 text-center text-primary tracking-tight">
           {isSignUp ? 'Créer un compte' : 'Se connecter'}
         </h1>
-        <form onSubmit={handleAuth} className="space-y-4">
+        <form onSubmit={(e) => { void handleAuth(e) }} className="space-y-6">
           {isSignUp && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">Nom d&apos;utilisateur</label>
+              <label className="block text-sm font-medium text-foreground mb-1.5">Nom d&rsquo;utilisateur</label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="block w-full px-4 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder:text-muted"
+                placeholder="Votre pseudo"
                 required
               />
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full px-4 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder:text-muted"
+              placeholder="votre@email.com"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Mot de passe</label>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Mot de passe</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="block w-full px-4 py-2.5 bg-background border border-border rounded-xl text-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder:text-muted"
+              placeholder="••••••••"
               required
             />
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-red-500 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20">{error}</p>}
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-xl shadow-sm text-sm font-bold text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 transition-all active:scale-[0.98]"
           >
             {loading ? 'Chargement...' : isSignUp ? "S'inscrire" : 'Se connecter'}
           </button>
         </form>
-        <div className="mt-4 text-center">
+        <div className="mt-8 text-center">
           <button
             onClick={() => setIsSignUp(!isSignUp)}
-            className="text-sm text-blue-600 hover:text-blue-500"
+            className="text-sm text-primary hover:text-primary/80 font-medium transition-colors"
           >
             {isSignUp ? 'Déjà un compte ? Se connecter' : "Pas de compte ? S'inscrire"}
           </button>

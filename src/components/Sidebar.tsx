@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
 type Profile = {
@@ -14,16 +14,23 @@ export default function Sidebar() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set())
   const supabase = createClient()
+  const fetchProfilesRef = useRef<() => Promise<void>>(null)
+
+  const fetchProfiles = useCallback(async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+    if (data) setProfiles(data)
+  }, [supabase])
 
   useEffect(() => {
-    const fetchProfiles = async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-      if (data) setProfiles(data)
-    }
+    fetchProfilesRef.current = fetchProfiles
+  }, [fetchProfiles])
 
-    fetchProfiles()
+  useEffect(() => {
+    if (fetchProfilesRef.current) {
+      void fetchProfilesRef.current()
+    }
 
     // Realtime Presence
     const channel = supabase.channel('online-users')
@@ -36,12 +43,6 @@ export default function Sidebar() {
         })
         setOnlineUsers(onlineIds)
       })
-      .on('presence' as any, { event: 'join' }, ({ key, newPresences }: any) => {
-        // console.log('join', key, newPresences)
-      })
-      .on('presence' as any, { event: 'leave' }, ({ key, leftPresences }: any) => {
-        // console.log('leave', key, leftPresences)
-      })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           const { data: { user } } = await supabase.auth.getUser()
@@ -51,33 +52,44 @@ export default function Sidebar() {
         }
       })
 
+    // Profile updates
+    const profilesChannel = supabase
+      .channel('public:profiles')
+      .on('postgres_changes' as any, { event: '*', table: 'profiles' }, () => {
+        if (fetchProfilesRef.current) {
+          void fetchProfilesRef.current()
+        }
+      })
+      .subscribe()
+
     return () => {
-      supabase.removeChannel(channel)
+      void supabase.removeChannel(channel)
+      void supabase.removeChannel(profilesChannel)
     }
   }, [supabase])
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-4 sticky top-20">
-      <h2 className="font-semibold mb-4 text-gray-800 border-b pb-2">Utilisateurs</h2>
+    <div className="bg-card rounded-2xl shadow-sm border border-border p-4 sticky top-20">
+      <h2 className="font-semibold mb-4 text-foreground border-b border-border pb-2">Utilisateurs</h2>
       <ul className="space-y-3">
         {profiles.map((profile) => (
           <li key={profile.id} className="flex items-center gap-3">
             <div className="relative">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xs">
+              <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold text-xs border border-primary/20">
                 {profile.username?.charAt(0).toUpperCase() || '?'}
               </div>
               <div
-                className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${
+                className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-card ${
                   onlineUsers.has(profile.id) ? 'bg-green-500' : 'bg-red-500'
                 }`}
               />
             </div>
-            <span className="text-sm font-medium text-gray-700 truncate">
+            <span className="text-sm font-medium text-foreground truncate">
               {profile.username || 'Anonyme'}
             </span>
           </li>
         ))}
-        {profiles.length === 0 && <p className="text-xs text-gray-500">Aucun utilisateur</p>}
+        {profiles.length === 0 && <p className="text-xs text-muted">Aucun utilisateur</p>}
       </ul>
     </div>
   )
