@@ -3,8 +3,9 @@
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import { LogOut, User } from 'lucide-react'
+import type { User as SupabaseUser } from '@supabase/supabase-js'
 
-export default function Header({ user }: { user: any }) {
+export default function Header({ user }: { user: SupabaseUser }) {
   const supabase = createClient()
   const router = useRouter()
 
@@ -14,27 +15,29 @@ export default function Header({ user }: { user: any }) {
     router.refresh()
   }
 
-  return (
-    <header className="bg-white border-b sticky top-0 z-30 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-blue-600 tracking-tight">Dashboard</h1>
+  const username = user.user_metadata?.username || user.email?.split('@')[0] || 'Utilisateur'
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="bg-gray-200 p-2 rounded-full">
-              <User size={18} className="text-gray-600" />
+  return (
+    <header className="bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-30 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <h1 className="text-xl font-black text-primary tracking-tighter uppercase italic">Dashboard</h1>
+
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 bg-secondary rounded-full border border-border">
+            <div className="bg-primary/10 p-1 rounded-full">
+              <User size={14} className="text-primary" />
             </div>
-            <span className="hidden sm:inline text-sm font-medium text-gray-700">
-              {user.user_metadata?.username || user.email}
+            <span className="hidden sm:inline text-xs font-bold text-foreground">
+              {username}
             </span>
           </div>
 
           <button
-            onClick={handleSignOut}
-            className="p-2 text-gray-500 hover:text-red-600 transition-colors"
+            onClick={() => void handleSignOut()}
+            className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition-all"
             title="Déconnexion"
           >
-            <LogOut size={20} />
+            <LogOut size={18} />
           </button>
         </div>
       </div>
