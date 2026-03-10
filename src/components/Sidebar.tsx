@@ -1,29 +1,24 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/utils/supabase/client'
-
-type Profile = {
-  id: string
-  username: string
-  avatar_url: string
-  online?: boolean
-}
+import { Profile } from '@/types/database'
 
 export default function Sidebar() {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set())
   const supabase = createClient()
 
-  useEffect(() => {
-    const fetchProfiles = async () => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-      if (data) setProfiles(data)
-    }
+  const fetchProfiles = useCallback(async () => {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .order('username', { ascending: true })
+    if (data) setProfiles(data)
+  }, [supabase])
 
-    fetchProfiles()
+  useEffect(() => {
+    void fetchProfiles()
 
     // Realtime Presence
     const channel = supabase.channel('online-users')
@@ -36,12 +31,6 @@ export default function Sidebar() {
         })
         setOnlineUsers(onlineIds)
       })
-      .on('presence' as any, { event: 'join' }, ({ key, newPresences }: any) => {
-        // console.log('join', key, newPresences)
-      })
-      .on('presence' as any, { event: 'leave' }, ({ key, leftPresences }: any) => {
-        // console.log('leave', key, leftPresences)
-      })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
           const { data: { user } } = await supabase.auth.getUser()
@@ -52,32 +41,37 @@ export default function Sidebar() {
       })
 
     return () => {
-      supabase.removeChannel(channel)
+      void supabase.removeChannel(channel)
     }
-  }, [supabase])
+  }, [supabase, fetchProfiles])
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-4 sticky top-20">
-      <h2 className="font-semibold mb-4 text-gray-800 border-b pb-2">Utilisateurs</h2>
+    <div className="bg-card rounded-2xl shadow-xl border border-border p-4 sticky top-20">
+      <h2 className="font-bold mb-4 text-foreground border-b border-border pb-2 flex items-center justify-between">
+        Utilisateurs
+        <span className="text-[10px] bg-primary/20 text-primary px-2 py-0.5 rounded-full uppercase tracking-widest">
+          {profiles.length}
+        </span>
+      </h2>
       <ul className="space-y-3">
         {profiles.map((profile) => (
-          <li key={profile.id} className="flex items-center gap-3">
+          <li key={profile.id} className="flex items-center gap-3 group">
             <div className="relative">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-xs">
+              <div className="w-9 h-9 bg-primary/10 rounded-xl flex items-center justify-center text-primary font-bold text-sm border border-primary/20">
                 {profile.username?.charAt(0).toUpperCase() || '?'}
               </div>
               <div
-                className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white ${
-                  onlineUsers.has(profile.id) ? 'bg-green-500' : 'bg-red-500'
+                className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-card ${
+                  onlineUsers.has(profile.id) ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-muted-foreground'
                 }`}
               />
             </div>
-            <span className="text-sm font-medium text-gray-700 truncate">
+            <span className="text-sm font-semibold text-muted-foreground group-hover:text-foreground transition-colors truncate">
               {profile.username || 'Anonyme'}
             </span>
           </li>
         ))}
-        {profiles.length === 0 && <p className="text-xs text-gray-500">Aucun utilisateur</p>}
+        {profiles.length === 0 && <p className="text-xs text-muted-foreground italic text-center py-2">Aucun utilisateur</p>}
       </ul>
     </div>
   )
