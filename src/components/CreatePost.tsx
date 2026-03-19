@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { ImagePlus, X, Send } from 'lucide-react'
+import { ImagePlus, X, Send, Sparkles, AlertCircle } from 'lucide-react'
+import type { User } from '@supabase/supabase-js'
 
-export default function CreatePost({ user, onPostCreated }: { user: any, onPostCreated: () => void }) {
+export default function CreatePost({ user, onPostCreated }: { user: User, onPostCreated: () => void }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [type, setType] = useState<'revis-ions' | "n'oublions pas">('revis-ions')
@@ -81,87 +82,100 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-4">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex gap-2 p-1 bg-gray-100 rounded-lg w-fit">
+    <div className="bg-card rounded-3xl shadow-xl border border-border p-6 transition-all hover:border-primary/20">
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="flex gap-2 p-1 bg-white/5 rounded-2xl w-fit border border-border shadow-inner">
           <button
             type="button"
             onClick={() => setType('revis-ions')}
-            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-              type === 'revis-ions' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+              type === 'revis-ions' ? 'bg-primary text-white shadow-lg' : 'text-muted hover:text-foreground'
             }`}
           >
+            <Sparkles size={14} />
             Revis-ions
           </button>
           <button
             type="button"
             onClick={() => setType("n'oublions pas")}
-            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-              type === "n'oublions pas" ? 'bg-white shadow text-orange-600' : 'text-gray-500 hover:text-gray-700'
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+              type === "n'oublions pas" ? 'bg-orange-500 text-white shadow-lg' : 'text-muted hover:text-foreground'
             }`}
           >
+            <AlertCircle size={14} />
             N'oublions pas
           </button>
         </div>
 
         <input
           type="text"
-          placeholder="Titre..."
-          className="w-full text-lg font-bold border-none focus:ring-0 p-0"
+          placeholder="Titre de votre publication..."
+          className="w-full text-xl font-bold border-none focus:ring-0 p-0 bg-transparent placeholder:text-muted/50"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
         />
 
         <textarea
-          placeholder="Description..."
-          className="w-full border-none focus:ring-0 p-0 resize-none min-h-[80px]"
+          placeholder="Décrivez ce que vous souhaitez partager..."
+          className="w-full border-none focus:ring-0 p-0 resize-none min-h-[100px] bg-transparent text-foreground placeholder:text-muted/40 leading-relaxed"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
 
-        <div className="grid grid-cols-2 gap-4">
-          <input
-            type="text"
-            placeholder="Matière (ex: Math)"
-            className="text-sm border-gray-200 rounded-lg"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
-          />
-          <input
-            type="date"
-            className="text-sm border-gray-200 rounded-lg"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase tracking-widest text-muted ml-2">Matière</label>
+            <input
+              type="text"
+              placeholder="Ex: Mathématiques"
+              className="w-full text-sm bg-white/5 border border-border rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary focus:bg-white/10 outline-none transition-all placeholder:text-muted/30"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase tracking-widest text-muted ml-2">Échéance</label>
+            <input
+              type="date"
+              className="w-full text-sm bg-white/5 border border-border rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary focus:bg-white/10 outline-none transition-all [color-scheme:dark]"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
+          </div>
         </div>
 
         {/* Image Previews */}
         {images.length > 0 && (
-          <div className="flex gap-2">
+          <div className="flex gap-3 animate-in zoom-in-95 duration-200">
             {images.map((image, i) => (
-              <div key={i} className="relative w-20 h-20">
+              <div key={i} className="relative w-24 h-24 group">
                 <img
                   src={URL.createObjectURL(image)}
                   alt="preview"
-                  className="w-full h-full object-cover rounded-lg border"
+                  className="w-full h-full object-cover rounded-2xl border border-border shadow-lg transition-all group-hover:scale-105"
                 />
                 <button
                   type="button"
                   onClick={() => removeImage(i)}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md"
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 shadow-xl transition-all hover:bg-red-600 active:scale-90"
                 >
-                  <X size={12} />
+                  <X size={14} />
                 </button>
               </div>
             ))}
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-2 border-t">
-          <label className="flex items-center gap-2 text-gray-500 hover:text-blue-600 cursor-pointer transition-colors">
-            <ImagePlus size={20} />
-            <span className="text-sm font-medium">Ajouter images ({images.length}/3)</span>
+        <div className="flex items-center justify-between pt-5 border-t border-border">
+          <label className="flex items-center gap-2.5 text-muted hover:text-primary cursor-pointer transition-all active:scale-95 group">
+            <div className="p-2.5 bg-white/5 rounded-xl border border-border group-hover:border-primary/50 transition-all shadow-inner">
+              <ImagePlus size={20} />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-bold">Ajouter images</span>
+              <span className="text-[10px] font-medium opacity-60">({images.length}/3)</span>
+            </div>
             <input
               type="file"
               accept="image/*"
@@ -175,11 +189,13 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
           <button
             type="submit"
             disabled={loading || !title}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="bg-primary text-white px-6 py-3 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center gap-2.5 hover:bg-primary/90 shadow-xl shadow-primary/20 transition-all disabled:opacity-50 active:scale-95"
           >
-            {loading ? 'Publication...' : (
+            {loading ? (
+              <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
               <>
-                <Send size={18} />
+                <Send size={16} />
                 Publier
               </>
             )}
