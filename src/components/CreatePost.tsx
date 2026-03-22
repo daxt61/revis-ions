@@ -2,9 +2,10 @@
 
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { ImagePlus, X, Send } from 'lucide-react'
+import { ImagePlus, X, Send, Loader2 } from 'lucide-react'
+import { User } from '@supabase/supabase-js'
 
-export default function CreatePost({ user, onPostCreated }: { user: any, onPostCreated: () => void }) {
+export default function CreatePost({ user, onPostCreated }: { user: User, onPostCreated: () => void }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [type, setType] = useState<'revis-ions' | "n'oublions pas">('revis-ions')
@@ -81,14 +82,16 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-4">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex gap-2 p-1 bg-gray-100 rounded-lg w-fit">
+    <div className="bg-card rounded-3xl shadow-2xl border border-border p-6 overflow-hidden relative">
+      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-3xl pointer-events-none"></div>
+
+      <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+        <div className="flex gap-2 p-1 bg-muted rounded-2xl w-fit border border-border">
           <button
             type="button"
             onClick={() => setType('revis-ions')}
-            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-              type === 'revis-ions' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+              type === 'revis-ions' ? 'bg-primary shadow-lg text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Revis-ions
@@ -96,60 +99,67 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
           <button
             type="button"
             onClick={() => setType("n'oublions pas")}
-            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-              type === "n'oublions pas" ? 'bg-white shadow text-orange-600' : 'text-gray-500 hover:text-gray-700'
+            className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+              type === "n'oublions pas" ? 'bg-orange-500 shadow-lg text-white' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             N'oublions pas
           </button>
         </div>
 
-        <input
-          type="text"
-          placeholder="Titre..."
-          className="w-full text-lg font-bold border-none focus:ring-0 p-0"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          required
-        />
-
-        <textarea
-          placeholder="Description..."
-          className="w-full border-none focus:ring-0 p-0 resize-none min-h-[80px]"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-2">
           <input
             type="text"
-            placeholder="Matière (ex: Math)"
-            className="text-sm border-gray-200 rounded-lg"
-            value={subject}
-            onChange={(e) => setSubject(e.target.value)}
+            placeholder="Donnez un titre percutant..."
+            className="w-full text-2xl font-black border-none focus:ring-0 p-0 bg-transparent placeholder:text-muted-foreground/30 tracking-tight"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            required
           />
-          <input
-            type="date"
-            className="text-sm border-gray-200 rounded-lg"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
+
+          <textarea
+            placeholder="Partagez les détails de votre révision ou de cet événement..."
+            className="w-full border-none focus:ring-0 p-0 resize-none min-h-[100px] bg-transparent text-foreground/80 placeholder:text-muted-foreground/30 font-medium"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
           />
         </div>
 
-        {/* Image Previews */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Matière</label>
+            <input
+              type="text"
+              placeholder="Ex: Mathématiques"
+              className="w-full text-sm bg-muted/50 border border-border rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary outline-none transition-all font-bold"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Échéance</label>
+            <input
+              type="date"
+              className="w-full text-sm bg-muted/50 border border-border rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-primary outline-none transition-all font-bold"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+            />
+          </div>
+        </div>
+
         {images.length > 0 && (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-3">
             {images.map((image, i) => (
-              <div key={i} className="relative w-20 h-20">
+              <div key={i} className="relative w-24 h-24 group">
                 <img
                   src={URL.createObjectURL(image)}
                   alt="preview"
-                  className="w-full h-full object-cover rounded-lg border"
+                  className="w-full h-full object-cover rounded-2xl border border-border shadow-md"
                 />
                 <button
                   type="button"
                   onClick={() => removeImage(i)}
-                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md"
+                  className="absolute -top-2 -right-2 bg-destructive text-destructive-foreground rounded-full p-1.5 shadow-lg scale-0 group-hover:scale-100 transition-transform"
                 >
                   <X size={12} />
                 </button>
@@ -158,10 +168,12 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-2 border-t">
-          <label className="flex items-center gap-2 text-gray-500 hover:text-blue-600 cursor-pointer transition-colors">
-            <ImagePlus size={20} />
-            <span className="text-sm font-medium">Ajouter images ({images.length}/3)</span>
+        <div className="flex items-center justify-between pt-6 border-t border-border">
+          <label className="flex items-center gap-2.5 text-muted-foreground hover:text-primary cursor-pointer transition-all group">
+            <div className="bg-muted p-2.5 rounded-xl group-hover:bg-primary/10 transition-colors">
+              <ImagePlus size={20} />
+            </div>
+            <span className="text-xs font-black uppercase tracking-widest">Images ({images.length}/3)</span>
             <input
               type="file"
               accept="image/*"
@@ -175,9 +187,11 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
           <button
             type="submit"
             disabled={loading || !title}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="bg-primary text-primary-foreground px-8 py-3 rounded-2xl font-black uppercase tracking-widest text-xs flex items-center gap-3 shadow-[0_10px_20px_rgba(59,130,246,0.3)] hover:translate-y-[-2px] active:translate-y-[0px] transition-all disabled:opacity-50 disabled:translate-y-0"
           >
-            {loading ? 'Publication...' : (
+            {loading ? (
+              <Loader2 className="animate-spin" size={18} />
+            ) : (
               <>
                 <Send size={18} />
                 Publier
