@@ -3,8 +3,9 @@
 import { useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { ImagePlus, X, Send } from 'lucide-react'
+import { User } from '@supabase/supabase-js'
 
-export default function CreatePost({ user, onPostCreated }: { user: any, onPostCreated: () => void }) {
+export default function CreatePost({ user, onPostCreated }: { user: User, onPostCreated: () => void }) {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [type, setType] = useState<'revis-ions' | "n'oublions pas">('revis-ions')
@@ -81,14 +82,14 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border p-4">
+    <div className="bg-card rounded-2xl shadow-sm border border-border p-4">
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="flex gap-2 p-1 bg-gray-100 rounded-lg w-fit">
+        <div className="flex gap-2 p-1 bg-white/5 rounded-xl w-fit">
           <button
             type="button"
             onClick={() => setType('revis-ions')}
-            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-              type === 'revis-ions' ? 'bg-white shadow text-blue-600' : 'text-gray-500 hover:text-gray-700'
+            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+              type === 'revis-ions' ? 'bg-primary text-white shadow' : 'text-muted hover:text-foreground'
             }`}
           >
             Revis-ions
@@ -96,18 +97,18 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
           <button
             type="button"
             onClick={() => setType("n'oublions pas")}
-            className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
-              type === "n'oublions pas" ? 'bg-white shadow text-orange-600' : 'text-gray-500 hover:text-gray-700'
+            className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+              type === "n'oublions pas" ? 'bg-orange-500 text-white shadow' : 'text-muted hover:text-foreground'
             }`}
           >
-            N'oublions pas
+            { "N'oublions pas" }
           </button>
         </div>
 
         <input
           type="text"
           placeholder="Titre..."
-          className="w-full text-lg font-bold border-none focus:ring-0 p-0"
+          className="w-full text-lg font-bold border-none focus:ring-0 p-0 bg-transparent text-foreground placeholder-muted"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
@@ -115,7 +116,7 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
 
         <textarea
           placeholder="Description..."
-          className="w-full border-none focus:ring-0 p-0 resize-none min-h-[80px]"
+          className="w-full border-none focus:ring-0 p-0 resize-none min-h-[80px] bg-transparent text-muted placeholder-muted"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
@@ -124,13 +125,13 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
           <input
             type="text"
             placeholder="Matière (ex: Math)"
-            className="text-sm border-gray-200 rounded-lg"
+            className="text-sm border-border bg-white/5 rounded-xl text-foreground placeholder-muted"
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
           />
           <input
             type="date"
-            className="text-sm border-gray-200 rounded-lg"
+            className="text-sm border-border bg-white/5 rounded-xl text-foreground [color-scheme:dark]"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
           />
@@ -144,7 +145,7 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
                 <img
                   src={URL.createObjectURL(image)}
                   alt="preview"
-                  className="w-full h-full object-cover rounded-lg border"
+                  className="w-full h-full object-cover rounded-lg border border-border"
                 />
                 <button
                   type="button"
@@ -158,8 +159,8 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-2 border-t">
-          <label className="flex items-center gap-2 text-gray-500 hover:text-blue-600 cursor-pointer transition-colors">
+        <div className="flex items-center justify-between pt-2 border-t border-border">
+          <label className="flex items-center gap-2 text-muted hover:text-primary cursor-pointer transition-colors">
             <ImagePlus size={20} />
             <span className="text-sm font-medium">Ajouter images ({images.length}/3)</span>
             <input
@@ -175,7 +176,7 @@ export default function CreatePost({ user, onPostCreated }: { user: any, onPostC
           <button
             type="submit"
             disabled={loading || !title}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="bg-primary text-white px-4 py-2 rounded-xl font-medium flex items-center gap-2 hover:bg-primary/90 disabled:opacity-50 transition-colors"
           >
             {loading ? 'Publication...' : (
               <>
