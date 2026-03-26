@@ -3,8 +3,9 @@
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import { LogOut, User } from 'lucide-react'
+import { User as SupabaseUser } from '@supabase/supabase-js'
 
-export default function Header({ user }: { user: any }) {
+export default function Header({ user }: { user: SupabaseUser }) {
   const supabase = createClient()
   const router = useRouter()
 
@@ -15,23 +16,23 @@ export default function Header({ user }: { user: any }) {
   }
 
   return (
-    <header className="bg-white border-b sticky top-0 z-30 shadow-sm">
+    <header className="bg-card border-b border-border sticky top-0 z-30 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-blue-600 tracking-tight">Dashboard</h1>
+        <h1 className="text-xl font-bold text-primary tracking-tight">Hub d&apos;Entraide</h1>
 
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className="bg-gray-200 p-2 rounded-full">
-              <User size={18} className="text-gray-600" />
+            <div className="bg-white/10 p-2 rounded-full">
+              <User size={18} className="text-muted" />
             </div>
-            <span className="hidden sm:inline text-sm font-medium text-gray-700">
+            <span className="hidden sm:inline text-sm font-medium text-foreground">
               {user.user_metadata?.username || user.email}
             </span>
           </div>
 
           <button
             onClick={handleSignOut}
-            className="p-2 text-gray-500 hover:text-red-600 transition-colors"
+            className="p-2 text-muted hover:text-red-500 transition-colors"
             title="Déconnexion"
           >
             <LogOut size={20} />
