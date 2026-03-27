@@ -21,7 +21,7 @@ export default function LoginPage() {
         router.push('/')
       }
     }
-    checkUser()
+    void checkUser()
   }, [supabase, router])
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -59,41 +59,41 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
-      <div className="w-full max-w-md p-8 bg-white rounded-xl shadow-md">
-        <h1 className="text-2xl font-bold mb-6 text-center text-blue-600">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4">
+      <div className="w-full max-w-md p-8 bg-card rounded-xl shadow-md border border-border">
+        <h1 className="text-2xl font-bold mb-6 text-center text-primary">
           {isSignUp ? 'Créer un compte' : 'Se connecter'}
         </h1>
         <form onSubmit={handleAuth} className="space-y-4">
           {isSignUp && (
             <div>
-              <label className="block text-sm font-medium text-gray-700">Nom d&apos;utilisateur</label>
+              <label className="block text-sm font-medium text-foreground">Nom d'utilisateur</label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full px-3 py-2 bg-secondary border border-border text-foreground rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
                 required
               />
             </div>
           )}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
+            <label className="block text-sm font-medium text-foreground">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 bg-secondary border border-border text-foreground rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Mot de passe</label>
+            <label className="block text-sm font-medium text-foreground">Mot de passe</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              className="mt-1 block w-full px-3 py-2 bg-secondary border border-border text-foreground rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
               required
             />
           </div>
@@ -101,7 +101,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
           >
             {loading ? 'Chargement...' : isSignUp ? "S'inscrire" : 'Se connecter'}
           </button>
@@ -109,7 +109,7 @@ export default function LoginPage() {
         <div className="mt-4 text-center">
           <button
             onClick={() => setIsSignUp(!isSignUp)}
-            className="text-sm text-blue-600 hover:text-blue-500"
+            className="text-sm text-primary hover:text-primary/90"
           >
             {isSignUp ? 'Déjà un compte ? Se connecter' : "Pas de compte ? S'inscrire"}
           </button>
