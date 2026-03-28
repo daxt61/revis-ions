@@ -2,7 +2,7 @@
 
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
-import { LogOut, User } from 'lucide-react'
+import { LogOut, User as UserIcon } from 'lucide-react'
 
 export default function Header({ user }: { user: any }) {
   const supabase = createClient()
@@ -14,24 +14,35 @@ export default function Header({ user }: { user: any }) {
     router.refresh()
   }
 
-  return (
-    <header className="bg-white border-b sticky top-0 z-30 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-blue-600 tracking-tight">Dashboard</h1>
+  const username = user.user_metadata?.username || user.email?.split('@')[0] || 'Utilisateur'
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="bg-gray-200 p-2 rounded-full">
-              <User size={18} className="text-gray-600" />
+  return (
+    <header className="bg-card/50 backdrop-blur-md border-b border-border sticky top-0 z-30 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="bg-primary p-1.5 rounded-lg shadow-lg shadow-primary/20">
+            <div className="w-6 h-6 border-2 border-white rounded-md flex items-center justify-center font-bold text-white text-xs">
+              H
             </div>
-            <span className="hidden sm:inline text-sm font-medium text-gray-700">
-              {user.user_metadata?.username || user.email}
+          </div>
+          <h1 className="text-xl font-black text-foreground tracking-tighter uppercase">
+            Hub d'Entraide
+          </h1>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 bg-secondary/50 px-3 py-1.5 rounded-full border border-border transition-all hover:bg-secondary">
+            <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary border border-primary/20">
+              <UserIcon size={18} />
+            </div>
+            <span className="hidden sm:inline text-sm font-semibold text-foreground">
+              {username}
             </span>
           </div>
 
           <button
             onClick={handleSignOut}
-            className="p-2 text-gray-500 hover:text-red-600 transition-colors"
+            className="p-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full transition-all"
             title="Déconnexion"
           >
             <LogOut size={20} />
