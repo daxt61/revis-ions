@@ -1,19 +1,22 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import PostCard from './PostCard'
 import CreatePost from './CreatePost'
-import { Search, Filter } from 'lucide-react'
+import { Search, Filter, Sparkles } from 'lucide-react'
+import { User } from '@supabase/supabase-js'
+import { Post } from '@/utils/types'
 
-export default function PostFeed({ user }: { user: any }) {
-  const [posts, setPosts] = useState<any[]>([])
+export default function PostFeed({ user }: { user: User }) {
+  const [posts, setPosts] = useState<Post[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [subjectFilter, setSubjectFilter] = useState('')
+  const fetchPostsRef = useRef<() => Promise<void>>(async () => {})
   const supabase = createClient()
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     setLoading(true)
     let query = supabase
       .from('posts')
@@ -28,67 +31,83 @@ export default function PostFeed({ user }: { user: any }) {
       query = query.ilike('subject', `%${subjectFilter}%`)
     }
 
-    const { data, error } = await query
-    if (data) setPosts(data)
+    const { data } = await query
+    if (data) setPosts(data as any)
     setLoading(false)
-  }
+  }, [supabase, search, subjectFilter])
 
   useEffect(() => {
-    fetchPosts()
+    fetchPostsRef.current = fetchPosts
+  }, [fetchPosts])
 
-    // Realtime for new posts
+  useEffect(() => {
+    void fetchPosts()
+  }, [fetchPosts])
+
+  useEffect(() => {
     const channel = supabase
       .channel('public:posts')
       .on('postgres_changes' as any, { event: '*', table: 'posts' }, () => {
-        fetchPosts()
+        void fetchPostsRef.current()
       })
       .subscribe()
 
     return () => {
-      supabase.removeChannel(channel)
+      void supabase.removeChannel(channel)
     }
-  }, [search, subjectFilter])
+  }, [supabase])
 
   return (
-    <div className="space-y-6 pb-20">
-      <CreatePost user={user} onPostCreated={fetchPosts} />
+    <div className="space-y-8 pb-20">
+      <CreatePost user={user} onPostCreated={() => void fetchPosts()} />
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3 bg-white p-3 rounded-xl shadow-sm border">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+      <div className="flex flex-col sm:flex-row gap-4 bg-gray-900/40 backdrop-blur-md p-4 rounded-2xl border border-white/10 shadow-xl">
+        <div className="relative flex-1 group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-blue-400 transition-colors" size={18} />
           <input
             type="text"
-            placeholder="Rechercher..."
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+            placeholder="Rechercher une pépite..."
+            className="w-full pl-12 pr-4 py-3 bg-gray-950/50 border border-white/5 rounded-xl focus:border-blue-500/50 focus:ring-0 text-sm text-gray-200 placeholder-gray-600 transition-all"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <div className="relative w-full sm:w-48">
-          <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        <div className="relative w-full sm:w-56 group">
+          <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-indigo-400 transition-colors" size={18} />
           <input
             type="text"
-            placeholder="Matière..."
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 border-none rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
+            placeholder="Filtrer par matière..."
+            className="w-full pl-12 pr-4 py-3 bg-gray-950/50 border border-white/5 rounded-xl focus:border-indigo-500/50 focus:ring-0 text-sm text-gray-200 placeholder-gray-600 transition-all"
             value={subjectFilter}
             onChange={(e) => setSubjectFilter(e.target.value)}
           />
         </div>
       </div>
 
-      {loading ? (
-        <div className="flex justify-center py-10">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      {loading && posts.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 gap-4">
+          <div className="relative">
+            <div className="w-12 h-12 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin" />
+            <Sparkles className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-blue-400/50" size={16} />
+          </div>
+          <p className="text-gray-500 font-medium animate-pulse">Chargement du Hub...</p>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-6">
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} currentUser={user} onUpdate={fetchPosts} />
+            <PostCard key={post.id} post={post} currentUser={user} onUpdate={() => void fetchPosts()} />
           ))}
-          {posts.length === 0 && (
-            <div className="text-center py-10 bg-white rounded-xl border border-dashed border-gray-300">
-              <p className="text-gray-500">Aucune publication trouvée.</p>
+
+          {posts.length === 0 && !loading && (
+            <div className="text-center py-20 bg-gray-900/20 rounded-3xl border border-dashed border-white/10 flex flex-col items-center gap-4">
+              <div className="p-4 bg-gray-900 rounded-full border border-white/5">
+                <Search size={32} className="text-gray-700" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-gray-400 font-bold text-lg">Aucune publication trouvée</p>
+                <p className="text-gray-600 text-sm">Essayez de modifier vos filtres ou lancez un nouveau sujet !</p>
+              </div>
             </div>
           )}
         </div>
