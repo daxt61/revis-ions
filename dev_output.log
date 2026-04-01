@@ -1,0 +1,13 @@
+
+> dashboard@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+
+✓ Starting...
+✓ Ready in 1673ms
+○ Compiling /login ...
+ GET /login 200 in 4.8s (compile: 4.4s, proxy.ts: 11ms, render: 398ms)
+ GET /login 200 in 204ms (compile: 66ms, proxy.ts: 11ms, render: 126ms)

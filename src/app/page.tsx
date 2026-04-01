@@ -18,7 +18,7 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header user={user} />
 
       <main className="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full p-4 gap-6">
@@ -32,11 +32,11 @@ export default async function Home() {
           <Sidebar />
         </aside>
 
-        {/* Mobile Users Toggle */}
+        {/* Mobile Users Toggle - Left Positioned */}
         <MobileUsersToggle />
       </main>
 
-      {/* Floating Chat Button for Mobile and Desktop */}
+      {/* Floating Chat Button - Right Positioned */}
       <ChatButton user={user} />
     </div>
   )
